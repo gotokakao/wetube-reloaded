@@ -158,7 +158,21 @@ export const finishNaverLogin = async (req, res) =>{
 }
  */
 
-export const edit = (req, res) => res.send("Edit User");
+export const getEdit = (req, res) => {
+    return res.render("edit-profile", {pageTitle : "Edit Profile"});
+}
+
+export const postEdit = async (req, res) => {
+    const {email, username, name, location} = req.body;
+    const exist = await User.exists({username});
+
+    if(!exist){
+        return res.redirect("/");
+    }
+
+
+    
+}
 
 export const logout = (req, res) => {
     req.session.destroy();
