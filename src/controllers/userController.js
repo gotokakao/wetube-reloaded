@@ -1,6 +1,7 @@
 import User from "../models/User";
 import fetch from "node-fetch";
 import bcrypt from "bcrypt";
+import { response } from "express";
 
 export const getJoin = (req, res) => res.render("join", {pageTitle : "Join"});
 export const postJoin = async (req, res) => {
@@ -32,7 +33,7 @@ export const getLogin = (req, res) => res.render("login",{pageTitle : "Login"});
 
 export const postLogin = async (req, res) => {
     const {username, password} = req.body;
-    const user = await User.findOne({username});
+    const user = await User.findOne({username, socialOnly : false});
     const pageTitle = "Login";
     if(!username){
         return res.status(400).render("login", {pageTitle, errorMessage : "An account with this username does not exixts"});
@@ -80,7 +81,7 @@ export const finishGithubLogin = async (req, res) =>{
 
         })
     ).json();
-
+ 
     if("access_token" in tokenRequest){
         const {access_token} = tokenRequest;
         const apiUrl = "https://api.github.com";
@@ -103,32 +104,64 @@ export const finishGithubLogin = async (req, res) =>{
         }
 
         
-        const existedUser = await User.findOne({email : emailObj.email});
-
-        if(existedUser){
-            req.session.loggedIn = true;
-            req.session.user = existedUser;
-            return res.redirect("/login");
-        }else{
-            const user = await User.create({
+        let user = await User.findOne({email : emailObj.email});
+        console.log(userData);
+        if(!user){
+            user = await User.create({
                 name : userData.name,
+                avatarUrl : userData.avatar_url,
                 email : emailObj.email,
                 username : userData.login,
                 location : userData.location,
                 socialOnly : true,
                 password : "",
             });
-            req.session.loggedIn = true;
-            req.session.user = user;
-            return res.redirect("/login");
         }
+        req.session.loggedIn = true;
+        req.session.user = user;
+        return res.redirect("/login");
     }else{
         return res.redirect("/login");
     }
 }
+/**
+export const startNaverLogin = (req, res) => {
+    const baseUrl = "https://nid.naver.com/oauth2.0/authorize?response_type=code";
+    const config = {
+        client_id : process.env.NAVER_CLIENT,
+        redirect_uri : "http://localhost:4000/users/naver/finish",
+        state : "RAMDOM_STATE",
+    }
+
+    const params = new URLSearchParams(config).toString();
+    const finalUrl = `${baseUrl}&${params}`;
+    return res.redirect(finalUrl);
+}
+export const finishNaverLogin = async (req, res) =>{
+    const baseUrl = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code";
+    const config = {
+        client_id : process.env.NAVER_CLIENT,
+        client_secret : process.env.NAVER_SECRET,
+        state : req.query.state,
+        code : req.query.code,
+
+    };
+    
+    const params = new URLSearchParams(config).toString();
+    const finalUrl = `${baseUrl}&${params}`;
+    let accessToken;
+    fetch(finalUrl)
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+    return res.end();
+
+}
+ */
 
 export const edit = (req, res) => res.send("Edit User");
-export const remove = (req, res) => res.send("Delete Users"); 
 
-export const logout = (req, res) => res.send("Logout");
+export const logout = (req, res) => {
+    req.session.destroy();
+    return res.redirect("/");
+};
 export const see = (req, res) => res.send("See");
