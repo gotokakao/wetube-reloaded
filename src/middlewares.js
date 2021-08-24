@@ -19,4 +19,4 @@ export const publicOnlyMiddleware = (req, res, next) => {
     }else{
         return res.redirect("/");
     }
-}
+} 
