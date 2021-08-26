@@ -105,7 +105,6 @@ export const finishGithubLogin = async (req, res) =>{
 
         
         let user = await User.findOne({email : emailObj.email});
-        console.log(userData);
         if(!user){
             user = await User.create({
                 name : userData.name,
@@ -163,19 +162,63 @@ export const getEdit = (req, res) => {
 }
 
 export const postEdit = async (req, res) => {
-    const {email, username, name, location} = req.body;
-    const exist = await User.exists({username});
+    const {
+        session : 
+            {user : {_id, avatarUrl}}, 
+        body : 
+            {email, username, name, location},
+        file 
+    } = req;
 
-    if(!exist){
-        return res.redirect("/");
-    }
-
-
-    
+    const updatedUser = await User.findByIdAndUpdate(
+        _id, 
+            {
+                avatarUrl : file ? file.path : avatarUrl,
+                email,
+                username,
+                name,
+                location,
+            },
+            {new : true},
+        );
+    req.session.user = updatedUser;
+    return res.redirect("/users/edit");
+        
 }
 
 export const logout = (req, res) => {
     req.session.destroy();
     return res.redirect("/");
 };
+
+export const getChangePassword = (req, res) =>{
+    return res.render("users/change-password", {pageTitle : "Change Password"});
+
+}
+
+export const postChangePassword = async (req ,res) => {
+    const {session : 
+        {user : 
+            {_id}
+        },
+        body: {oldPassword, newPassword1, newPassword2},
+    } = req;
+
+    const user = await User.findById(_id);
+    const ok = await bcrypt.compare(oldPassword, user.password);
+
+    if(!ok){
+        return res.status(400).render("users/change-password", {pageTitle : "Change Password", errorMessage : "Current Password is incorrent"});
+    }
+
+    if(newPassword1 !== newPassword2){
+        return res.status(400).render("users/change-password", {pageTitle : "Change Password", errorMessage : "Please Check New Password"});
+    }
+
+    user.password = newPassword1;
+    await user.save();
+    return res.redirect("/");
+
+}
+
 export const see = (req, res) => res.send("See");
