@@ -1,10 +1,14 @@
+include mixins/message
+
 doctype html 
 html(lang="ko")
     head 
         title #{pageTitle} | Wetube
         link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
         link(rel="stylesheet", href="/static/css/styles.css")
-    body 
+    body
+        if messages.error
+            +message("error", messages.error) 
         include partials/header
         main
             block content

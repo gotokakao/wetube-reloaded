@@ -42,6 +42,7 @@ export const postLogin = async (req, res) => {
 
     const match = await bcrypt.compare(password, user.password);
     if(!match){
+        req.flash("error", "Wrong Password");
         return res.status(400).render("login", {pageTitle, errorMessage : "Wrong Password"});
     }
 
@@ -119,7 +120,7 @@ export const finishGithubLogin = async (req, res) =>{
         }
         req.session.loggedIn = true;
         req.session.user = user;
-        return res.redirect("/login");
+        return res.redirect("/");
     }else{
         return res.redirect("/login");
     }
