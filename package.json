@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "The best way to watch veidos",
   "scripts": {
+    "start" : "node build/init.js",
+    "build" : "npm run build:assets && npm run build:server",
+    "build:assets" : "webpack --mode=production",
+    "build:server" : "babel src -d build",
     "dev:server": "nodemon",
-    "dev:assets": "webpack"
+    "dev:assets": "webpack --mode=development -w"
   },
   "repository": {
     "type": "git",
@@ -33,7 +37,8 @@
     "regenerator-runtime": "^0.13.9"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.8",
+    "@babel/cli": "^7.15.7",
+    "@babel/core": "^7.15.5",
     "@babel/node": "^7.14.7",
     "@babel/preset-env": "^7.14.8",
     "babel-loader": "^8.2.2",

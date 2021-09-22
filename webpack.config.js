@@ -10,8 +10,6 @@ module.exports = {
       record : BASE_JS + "record.js",
       commentsSection : BASE_JS + "commentsSection.js",
     },
-    mode : "development",
-    watch : true,
     plugins: [
       new MiniCssExtractPlugin({
         filename: "css/styles.css",
