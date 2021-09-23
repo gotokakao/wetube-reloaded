@@ -18,7 +18,10 @@ header
                         if !leggedInUser.avatarUrl
                             span 🙁
                         else 
-                            img.header__avatar(src="/"+leggedInUser.avatarUrl)
+                            if leggedInUser.socialOnly
+                                img.header__avatar(src=leggedInUser.avatarUrl)
+                            else
+                                img.header__avatar(src="/"+leggedInUser.avatarUrl)
             else
                 li
                     a(href="/login") Login 
